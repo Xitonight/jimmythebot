@@ -24,8 +24,4 @@ ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
-# Use existing node user (UID 1000) and change ownership
-RUN chown -R node:node /app
-
-USER node
 CMD [ "node", "dist/main.js" ]
