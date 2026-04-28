@@ -1,17 +1,23 @@
 import { copyFile, mkdir, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { Dispatcher, filters } from '@mtcute/dispatcher'
+import { Dispatcher, filters, PropagationAction } from '@mtcute/dispatcher'
 import { md, TelegramClient } from '@mtcute/node'
 import { parseFile } from 'music-metadata'
 import { env } from './env.js'
 
 // Helper function to sanitize filenames for file system safety
 function sanitizeFilename(str: string): string {
-  return str.replace(/[/\\?%*:|"<>]/g, '_')
+    return str.replace(/[/\\?%*:|"<>]/g, '_')
 }
 
-const allowedIds = [782516899, 5727498089, 1224798495, 611938392, 720640238]
+const allowedIds = new Map<string, number>([
+    ['Nicolas', 782516899],
+    ['Simone', 5727498089],
+    ['Riccardo', 1224798495],
+    ['Alex', 611938392],
+    ['Pascal', 720640238],
+])
 
 const tg = new TelegramClient({
     apiId: env.API_ID,
@@ -22,7 +28,16 @@ const tg = new TelegramClient({
 const dp = Dispatcher.for(tg)
 
 dp.onNewMessage(
-    filters.and(filters.userId(allowedIds), filters.audio),
+    filters.not(
+        filters.userId([...allowedIds.values()]),
+    ),
+    async (_) => {
+        return PropagationAction.StopChildren
+    },
+)
+
+dp.onNewMessage(
+    filters.audio,
     async (upd) => {
         const tempFileName = `${sanitizeFilename(upd.media.performer || 'unknown')} - ${sanitizeFilename(upd.media.title || 'unknown')}.mp3`
         const msg = await upd.replyText(md`Downloading \`${tempFileName}\`...`)
@@ -36,7 +51,9 @@ dp.onNewMessage(
             // Read MP3 metadata
             const metadata = await parseFile(tempPath)
             const artist
-                = metadata.common.artist || upd.media.performer || 'Unknown Artist'
+                = metadata.common.artist
+                    || upd.media.performer
+                    || 'Unknown Artist'
             const album = metadata.common.album || 'Unknown Album'
 
             // Create final directory structure: music/{artist}/{album}
@@ -63,9 +80,28 @@ dp.onNewMessage(
     },
 )
 
+const abortController = new AbortController()
+
+// Handle termination signals
+process.on('SIGTERM', () => {
+    console.log('Received SIGTERM, aborting...')
+    abortController.abort()
+})
+
+process.on('SIGINT', () => {
+    console.log('Received SIGINT, aborting...')
+    abortController.abort()
+})
+
 const user = await tg.start({
     phone: env.PHONE_NUMBER,
     password: env.TG_PASSWORD,
+    abortSignal: abortController.signal,
 })
 
 console.log('Logged in as', user.username)
+
+abortController.signal.addEventListener('abort', () => {
+    console.log('Bot is shutting down gracefully...')
+    process.exit(0)
+})
