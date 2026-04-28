@@ -9,7 +9,7 @@
     "lint:fix": "eslint --fix .",
     "dev": "dotenv tsx watch ./src/main.ts",
     "build": "esbuild src/main.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/main.js --external:@mtcute/* --external:dotenv-cli --external:zod --external:music-metadata",
-    "start": "node dist/main.js"
+    "start": "dotenv tsx ./src/main.ts"
   },
   "dependencies": {
     "@mtcute/dispatcher": "^0.29.6",
@@ -23,6 +23,7 @@
     "@antfu/eslint-config": "^8.2.0",
     "@types/node": "^25.6.0",
     "esbuild": "^0.28.0",
+    "eslint": "^10.2.1",
     "typescript": "^6.0.3"
   },
   "pnpm": {
