@@ -1,15 +1,19 @@
 {
-  "name": "bot",
+  "name": "jimmythebot",
   "type": "module",
   "version": "0.0.1",
   "packageManager": "pnpm@10.24.0",
   "license": "MIT",
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": "eslint --fix"
+  },
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "dev": "dotenv tsx watch ./src/main.ts",
     "build": "esbuild src/main.ts --bundle --platform=node --target=node22 --format=esm --outfile=dist/main.js --external:@mtcute/* --external:dotenv-cli --external:zod --external:music-metadata",
-    "start": "dotenv tsx ./src/main.ts"
+    "start": "dotenv tsx ./src/main.ts",
+    "prepare": "node .husky/install.mjs"
   },
   "dependencies": {
     "@mtcute/dispatcher": "^0.29.6",
@@ -24,6 +28,8 @@
     "@types/node": "^25.6.0",
     "esbuild": "^0.28.0",
     "eslint": "^10.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "typescript": "^6.0.3"
   },
   "pnpm": {
