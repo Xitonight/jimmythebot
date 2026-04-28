@@ -5,6 +5,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable && corepack prepare pnpm@10.24.0 --activate
 
+ENV HUSKY=0
 WORKDIR /app
 
 FROM base AS deps
