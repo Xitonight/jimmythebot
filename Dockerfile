@@ -27,4 +27,10 @@ ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
+# Use node image default node user (UID/GID 1000)
+# will automatically set the owner 
+# to the host's user with same UID/GID
+RUN chown -R node:node /app
+
+USER node
 CMD [ "node", "dist/main.js" ]
