@@ -1,8 +1,8 @@
 import { Dispatcher, filters, PropagationAction } from '@mtcute/dispatcher'
 import { TelegramClient } from '@mtcute/node'
 import { env } from './env.js'
-import audioDp from './handleAudio.js'
-import linkDp from './handleLink.js'
+import audioDp from './handlers/handleAudio.js'
+import linkDp from './handlers/handleLink.js'
 
 const allowedIds = new Map<string, number>([
     ['Nicolas', 782516899],
@@ -25,9 +25,7 @@ dp.onNewMessage(
     filters.not(
         filters.userId([...allowedIds.values()]),
     ),
-    async (_) => {
-        return PropagationAction.StopChildren
-    },
+    () => PropagationAction.StopChildren,
 )
 
 dp.addChild(linkDp)

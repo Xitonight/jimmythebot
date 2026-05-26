@@ -5,7 +5,6 @@ export default antfu({
         indent: 4,
     },
     typescript: true,
-    jsonc: false,
     yaml: false,
     rules: {
         'curly': ['error', 'multi-line'],

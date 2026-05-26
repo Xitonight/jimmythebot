@@ -26,14 +26,16 @@ dp.onNewMessage(
 
             // Read MP3 metadata
             const metadata = await parseFile(tempPath)
-            const artist
-                = metadata.common.artist
+            const albumArtist
+                = metadata.common.albumartist
+                    || metadata.common.artists?.at(0)
+                    || metadata.common.artist?.split(/[/\\,]/)[0].trim()
                     || upd.media.performer
                     || 'Unknown Artist'
             const album = metadata.common.album || 'Unknown Album'
 
             // Create final directory structure: music/{artist}/{album}
-            const finalDir = join('music', artist, album)
+            const finalDir = join('music', albumArtist, album)
             await mkdir(finalDir, { recursive: true })
 
             // Move file to final location (copy + delete to handle cross-filesystem moves)
